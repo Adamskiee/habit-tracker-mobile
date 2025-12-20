@@ -1,4 +1,5 @@
 import { icons } from "@/constants/icons";
+import { HabitsProvider } from "@/hooks/useHabits";
 import { Tabs } from "expo-router";
 import React from "react";
 import { Image, Text, View } from "react-native";

@@ -1,11 +1,25 @@
-import { Text, View } from "react-native";
+import HabitItem from "@/components/HabitItem";
+import { useHabits } from "@/hooks/useHabits";
+import { FlatList, Text, View } from "react-native";
 
 export default function Index() {
+  const { habits } = useHabits();
+
   return (
-    <View
-      className="flex-1 justify-center items-center"
-    >
-      <Text className="font-bold">Home Screen</Text>
-    </View>
+    
+        <View className="screen-view">
+          <Text className="font-bold mb-5 mx-auto text-2xl">Habits</Text>
+          {
+            <FlatList
+              data={habits}
+              renderItem={({ item }) => (
+                <HabitItem title={item.title} id={item.id} completed={item.completed} />
+              )}
+              keyExtractor={(item) => item.id.toString()}
+              ListEmptyComponent={<Text className="mx-auto">No Habits.</Text>}
+            />
+          }
+        </View>
+      
   );
 }

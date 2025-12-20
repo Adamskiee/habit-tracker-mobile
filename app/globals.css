@@ -1,3 +1,16 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+.screen-view {
+  @apply px-3;
+}
+
+@layer components {
+  .btn {
+    @apply bg-blue-400 items-center py-3 px-3 rounded-2xl;
+  }
+  .btn > .btn-text {
+    @apply text-white;
+  }
+}
