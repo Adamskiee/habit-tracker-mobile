@@ -10,7 +10,6 @@ export default function RootLayout() {
         <HabitsProvider>
           <Stack>
             <Stack.Screen name="(screens)" options={{ headerShown: false }} />
-            <Stack.Screen name="habit/[id]" options={{ headerShown: true }}  />
           </Stack>
         </HabitsProvider>
       </SafeAreaView>
