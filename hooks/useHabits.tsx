@@ -8,19 +8,13 @@ import {
 
 import { HabitStorageService } from "@/services";
 
-interface HabitList {
-  id: string;
-  title: string;
-  description: string;
-  completed: boolean;
-}
-
 interface HabitsContextType {
   habits: HabitList[];
   setHabits: React.Dispatch<React.SetStateAction<HabitList[]>>;
-  getHabit: (id: string) => HabitList | null;
+  getHabit: (id: string) => HabitList | undefined;
   addHabit: (title: string, description: string) => void;
   toggleHabit: (id: string) => void;
+  deleteHabit: (id: string) => void;
   loading: boolean;
   error: Error | null;
   activeHabit: string;
@@ -35,7 +29,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<Error | null>(null);
   // for habit view modal in index.tsx to know what is the pressed habit item
   const [activeHabit, setActiveHabit] = useState("");
-  
+
   useEffect(() => {
     loadHabits();
   }, []);
@@ -68,12 +62,21 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const getHabit = (id: string) => {
+  const deleteHabit = async (id: string) => {
     try {
-      return habits.find((habit) => habit.id === id) || null;
+      await HabitStorageService.deteteHabit(id);
+      await loadHabits();
     } catch (error) {
       setError(error instanceof Error ? error : new Error("An error occured"));
-      return null;
+    }
+  };
+
+  const getHabit = (id: string) => {
+    try {
+      return habits.find((habit) => habit.id === id);
+    } catch (error) {
+      setError(error instanceof Error ? error : new Error("An error occured"));
+      return undefined;
     }
   };
 
@@ -98,6 +101,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
         error,
         activeHabit,
         setActiveHabit,
+        deleteHabit,
       }}
     >
       {children}

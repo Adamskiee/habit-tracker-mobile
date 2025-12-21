@@ -143,6 +143,19 @@ class HabitStorageService {
     }
   }
 
+  // DELETE
+  async deteteHabit(id: string): Promise<void> {
+    try {
+      const habits = await this.getAllHabits();
+
+      const updatedHabits = habits.filter((habit) => habit.id !== id);
+
+      await this.saveAllHabits(updatedHabits);
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // UTILITIES
   generateUUID() {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(

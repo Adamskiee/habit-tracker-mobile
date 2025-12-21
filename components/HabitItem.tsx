@@ -16,7 +16,7 @@ const HabitItem = ({
   completed,
   setActiveModal,
 }: HabitItemProps) => {
-  const { toggleHabit, setActiveHabit } = useHabits();
+  const { toggleHabit, setActiveHabit, deleteHabit } = useHabits();
 
   const handleHabitItemOnClick = () => {
     setActiveModal("habit-item");
@@ -30,10 +30,17 @@ const HabitItem = ({
           {title}
         </Text>
       </TouchableOpacity>
-      <Button
-        onPress={() => toggleHabit(id)}
-        text={`${completed ? "Undone" : "Done"}`}
-      />
+      <View className="flex-row gap-2">
+        <Button
+          onPress={() => deleteHabit(id)}
+          text="Delete"
+          className="bg-red-700"
+        />
+        <Button
+          onPress={() => toggleHabit(id)}
+          text={`${completed ? "Undone" : "Done"}`}
+        />
+      </View>
     </View>
   );
 };
