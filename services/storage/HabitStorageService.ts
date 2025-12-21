@@ -9,10 +9,12 @@ interface Habit {
 
 class HabitStorageService {
   private habitsKey: string;
+
   constructor() {
     this.habitsKey = "@habits";
   }
 
+  // READ
   async getAllHabits(): Promise<Habit[] | []> {
     try {
       const jsonValue = await AsyncStorage.getItem(this.habitsKey);
@@ -23,6 +25,16 @@ class HabitStorageService {
     }
   }
 
+  async getHabitById(id: string): Promise<Habit | null> {
+    try {
+      const habits = await this.getAllHabits();
+      return habits.find((habit) => habit.id === id) || null;
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  // CREATE
   async createHabit(newHabit: {
     title: string;
     description: string;
@@ -54,15 +66,7 @@ class HabitStorageService {
     }
   }
 
-  async getHabitById(id: string): Promise<Habit | null> {
-    try {
-      const habits = await this.getAllHabits();
-      return habits.find((habit) => habit.id === id) || null;
-    } catch (error) {
-      throw error;
-    }
-  }
-
+  // UPDATE
   async updateHabit(
     id: string,
     updates: { title?: string; description?: string; completed?: boolean }
@@ -93,8 +97,8 @@ class HabitStorageService {
 
       return {
         success: true,
-        message: "Updated successfully"
-      }
+        message: "Updated successfully",
+      };
     } catch (error) {
       console.error(error);
       return {
@@ -104,27 +108,29 @@ class HabitStorageService {
     }
   }
 
-  async toggleHabitCompletion(id: string): Promise<{success:boolean, message: string}> {
+  async toggleHabitCompletion(
+    id: string
+  ): Promise<{ success: boolean; message: string }> {
     try {
       const habit = await this.getHabitById(id);
-      if(!habit) {
+      if (!habit) {
         return {
           success: false,
-          message: "Habit not found"
-        }
+          message: "Habit not found",
+        };
       }
 
       await this.updateHabit(id, {
-        completed: !habit.completed
+        completed: !habit.completed,
       });
-      console.log("toggled")
+      console.log("toggled");
       return {
         success: true,
-        message: "Toggle habit successfully"
-      }
+        message: "Toggle habit successfully",
+      };
     } catch (error) {
-      console.error(error)
-      return {success: false, message: "Toggling habit error"}
+      console.error(error);
+      return { success: false, message: "Toggling habit error" };
     }
   }
 
@@ -137,6 +143,7 @@ class HabitStorageService {
     }
   }
 
+  // UTILITIES
   generateUUID() {
     return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
       /[xy]/g,
