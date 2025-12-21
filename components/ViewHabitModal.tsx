@@ -31,7 +31,13 @@ const ViewHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
       onBackdropPress={() => setActiveModal("none")}
     >
       <View className="bg-gray-200 rounded-2xl gap-4 w-full max-w-96 p-4">
-        <Text className="font-bold text-2xl">{habit?.title}</Text>
+        <Text
+          className={`font-bold text-5xl ${
+            habit?.completed && "complete-habit"
+          }`}
+        >
+          {habit?.title}
+        </Text>
         <Text>{habit?.description}</Text>
         <Button
           text={habit?.completed ? "Undone" : "Done"}
