@@ -20,23 +20,24 @@ const AddHabit = () => {
 
   return (
         <View className="screen-view">
-          <Text className="font-bold mt-20 mb-5 mx-auto text-2xl">
+          <Text className="screen-header">
             Add Habit
           </Text>
 
           <View className="gap-4">
             <TextInput
               keyboardType="default"
-              className="border border-gray-400 h-11 p-3 bg-white rounded-2xl"
+              className="border border-gray-400 px-4 font-medium bg-white rounded-2xl text-2xl placeholder:text-gray-400 "
               onChangeText={setTitle}
               placeholder="Title"
+              textAlignVertical="center"
               value={title}
             />
             <TextInput
               keyboardType="default"
               multiline
               textAlignVertical="top"
-              className="border border-gray-400 p-3 bg-white rounded-2xl h-32"
+              className="border border-gray-400 p-3 bg-white rounded-2xl h-32 placeholder:text-gray-400"
               numberOfLines={5}
               maxLength={200}
               onChangeText={setDescription}

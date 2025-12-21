@@ -14,9 +14,9 @@ const HabitItem = ({ title, id, completed }: HabitItemProps) => {
   const { toggleHabit } = useHabits();
 
   return (
-    <View className="py-4 flex-row items-center justify-between w-full">
+    <View className="flex-row items-center justify-between w-full">
       <Link href={`/habit/${id}`}>
-        <Text className={`text-2xl ${completed && "line-through"}`}>
+        <Text className={`text-2xl ${completed && "complete-habit"}`}>
           {title}
         </Text>
       </Link>

@@ -3,7 +3,13 @@
 @tailwind utilities;
 
 .screen-view {
-  @apply px-3;
+  @apply px-3 mt-20;
+}
+.screen-header {
+  @apply font-bold mx-auto text-2xl mb-2;
+}
+.complete-habit {
+  @apply line-through text-gray-400
 }
 
 @layer components {
