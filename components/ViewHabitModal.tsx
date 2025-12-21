@@ -49,11 +49,18 @@ const ViewHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
             {habit.title}
           </Text>
           <Text>{habit.description}</Text>
-          <Button
-            text={habit.completed ? "Undone" : "Done"}
-            onPress={handleOnToggle}
-          />
-          <Button text="Delete" onPress={() => handleOnDelete(habit.id)} />
+          <View className="flex-row gap-2">
+            <Button
+              text="Delete"
+              onPress={() => handleOnDelete(habit.id)}
+              className="bg-red-700 flex-1"
+            />
+            <Button
+              text={habit.completed ? "Undone" : "Done"}
+              onPress={handleOnToggle}
+              className="flex-1"
+            />
+          </View>
         </View>
       ) : (
         <View>
