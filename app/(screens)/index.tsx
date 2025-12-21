@@ -1,13 +1,13 @@
 import AddHabitModal from "@/components/AddHabitModal";
 import HabitItem from "@/components/HabitItem";
 import Fab from "@/components/ui/Fab";
+import ViewHabitModal from "@/components/ViewHabitModal";
 import { useHabits } from "@/hooks/useHabits";
 import { useState } from "react";
 import { FlatList, Text, View } from "react-native";
 
-
 export default function Index() {
-  const { habits } = useHabits();
+  const { habits} = useHabits();
   const [activeModal, setActiveModal] = useState<ModalType>("none");
 
   return (
@@ -21,6 +21,7 @@ export default function Index() {
               title={item.title}
               id={item.id}
               completed={item.completed}
+              setActiveModal={setActiveModal}
             />
           )}
           keyExtractor={(item) => item.id.toString()}
@@ -30,8 +31,9 @@ export default function Index() {
           }}
         />
       }
-      <Fab onPress={() => setActiveModal('add-habit')} />
+      <Fab onPress={() => setActiveModal("add-habit")} />
       <AddHabitModal visible={activeModal === "add-habit"} setActiveModal={setActiveModal} />
+      <ViewHabitModal visible={activeModal === "habit-item"} setActiveModal={setActiveModal}/>
     </View>
   );
 }

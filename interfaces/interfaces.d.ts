@@ -1,1 +1,1 @@
-type ModalType = "add-habit" | "none";
+type ModalType = "add-habit" | "habit-item" | "none";

@@ -3,5 +3,10 @@
     "source.fixAll": "explicit",
     "source.organizeImports": "explicit",
     "source.sortMembers": "explicit"
-  }
+  },
+  "vim.handleKeys": {
+    "<C-p>": false,
+    "<C-d>": false,
+    "<C-w>": false,
+  },
 }
