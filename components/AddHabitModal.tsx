@@ -26,7 +26,16 @@ const AddHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
   };
 
   return (
-    <Modal isVisible={visible} backdropOpacity={0.4} onBackdropPress={()=>setActiveModal("none")}>
+    <Modal
+      isVisible={visible}
+      animationIn={"fadeIn"}
+      animationOut={"fadeOutDown"}
+      backdropOpacity={0.4}
+      backdropColor="black"
+      backdropTransitionOutTiming={10}
+      useNativeDriver={false}
+      onBackdropPress={() => setActiveModal("none")}
+    >
       <View className="rounded-2xl gap-4 w-full max-w-96 bg-gray-200 p-4">
         <Text className="font-bold text-2xl">Add Habit</Text>
         <TextInput

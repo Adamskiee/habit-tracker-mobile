@@ -22,7 +22,12 @@ const ViewHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
   return (
     <Modal
       isVisible={visible}
+      animationIn={"fadeIn"}
+      animationOut={"fadeOutDown"}
       backdropOpacity={0.4}
+      backdropColor="black"
+      backdropTransitionOutTiming={10}
+      useNativeDriver={false}
       onBackdropPress={() => setActiveModal("none")}
     >
       <View className="bg-gray-200 rounded-2xl gap-4 w-full max-w-96 p-4">
