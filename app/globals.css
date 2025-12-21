@@ -3,20 +3,26 @@
 @tailwind utilities;
 
 .screen-view {
-  @apply px-3 mt-20;
+  @apply px-3 mt-20 flex-1;
 }
 .screen-header {
   @apply font-bold mx-auto text-2xl mb-2;
 }
 .complete-habit {
-  @apply line-through text-gray-400
+  @apply line-through text-gray-400;
 }
 
 @layer components {
   .btn {
     @apply bg-blue-400 items-center py-3 px-3 rounded-2xl;
   }
-  .btn > .btn-text {
-    @apply text-white;
+}
+
+@layer utilities {
+  .center {
+    @apply items-center justify-center flex-1;
+  }
+  .backdrop {
+    @apply bg-black/50 backdrop-blur-sm;
   }
 }

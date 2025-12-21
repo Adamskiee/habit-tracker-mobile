@@ -10,7 +10,7 @@ interface ButtonProps {
 const Button = ({onPress, className="", text}:ButtonProps) => {
   return (
     <Pressable onPress={onPress} className={`btn ${className}`}>
-      <Text className="text-white">{text}</Text>
+      <Text className="text-white font-medium">{text}</Text>
     </Pressable>
   );
 };

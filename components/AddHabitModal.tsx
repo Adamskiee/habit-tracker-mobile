@@ -1,9 +1,15 @@
-import Button from "@/components/ui/Button";
 import { useHabits } from "@/hooks/useHabits";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Text, TextInput, View } from "react-native";
+import Modal from "react-native-modal";
+import Button from "./ui/Button";
 
-const AddHabit = () => {
+interface AddHabitModalProps {
+  visible: boolean;
+  setActiveModal: React.Dispatch<React.SetStateAction<ModalType>>;
+}
+
+const AddHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
   const { addHabit } = useHabits();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -16,16 +22,16 @@ const AddHabit = () => {
     addHabit(title, description);
     setTitle("");
     setDescription("");
+    setActiveModal("none");
   };
 
   return (
-    <View className="screen-view">
-      <Text className="screen-header">Add Habit</Text>
-
-      <View className="gap-4">
+    <Modal isVisible={visible} backdropOpacity={0.4} onBackdropPress={()=>setActiveModal("none")}>
+      <View className="rounded-2xl gap-4 w-full max-w-96 bg-gray-200 p-4">
+        <Text className="font-bold text-2xl">Add Habit</Text>
         <TextInput
           keyboardType="default"
-          className="border border-gray-400 px-4 font-medium bg-white rounded-2xl text-2xl placeholder:text-gray-400 "
+          className="border border-gray-400 px-4 font-medium bg-white rounded-2xl text-2xl placeholder:text-gray-400"
           onChangeText={setTitle}
           placeholder="Title"
           textAlignVertical="center"
@@ -43,10 +49,10 @@ const AddHabit = () => {
           value={description}
         />
 
-        <Button onPress={handleAddHabit} text="Submit" />
+        <Button onPress={handleAddHabit} text="Add" />
       </View>
-    </View>
+    </Modal>
   );
 };
 
-export default AddHabit;
+export default AddHabitModal;
