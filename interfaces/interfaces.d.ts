@@ -6,3 +6,9 @@ interface HabitList {
   description: string;
   completed: boolean;
 }
+
+interface HabitEditProps {
+  title?: string;
+  description?: string;
+  completed?: boolean;
+}

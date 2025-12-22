@@ -1,7 +1,8 @@
 import { useHabits } from "@/hooks/useHabits";
 import React, { useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import Modal from "react-native-modal";
+import EditableText from "./EditableText";
 import Button from "./ui/Button";
 
 interface AddHabitModalProps {
@@ -10,13 +11,23 @@ interface AddHabitModalProps {
 }
 
 const ViewHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
-  const { toggleHabit, activeHabit, getHabit, deleteHabit } = useHabits();
+  const { toggleHabit, activeHabit, getHabit, deleteHabit, updateHabit } =
+    useHabits();
   const [habit, setHabit] = useState<HabitList | undefined>(undefined);
+  const [editableTitle, setEditableTitle] = useState(habit?.title);
+  const [editableDescription, setEditableDescription] = useState(
+    habit?.description
+  );
 
   useEffect(() => {
     setHabit(getHabit(activeHabit));
-    console.log("hello");
+    setEditableTitle(habit?.title);
+    setEditableDescription(habit?.description);
   }, [habit, activeHabit, getHabit]);
+
+  if (!habit) {
+    return;
+  }
 
   const handleOnToggle = () => {
     toggleHabit(activeHabit);
@@ -28,6 +39,13 @@ const ViewHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
     setActiveModal("none");
   };
 
+  const handleOnModalHide = () => {
+    updateHabit(habit.id, {
+      title: editableTitle,
+      description: editableDescription,
+    });
+  };
+
   return (
     <Modal
       isVisible={visible}
@@ -36,37 +54,35 @@ const ViewHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
       backdropOpacity={0.4}
       backdropColor="black"
       backdropTransitionOutTiming={10}
+      onModalHide={handleOnModalHide}
       useNativeDriver={false}
       onBackdropPress={() => setActiveModal("none")}
     >
-      {habit ? (
-        <View className="bg-gray-200 rounded-2xl gap-4 w-full max-w-96 p-4">
-          <Text
-            className={`font-bold text-5xl ${
-              habit.completed && "complete-habit"
-            }`}
-          >
-            {habit.title}
-          </Text>
-          <Text>{habit.description}</Text>
-          <View className="flex-row gap-2">
-            <Button
-              text="Delete"
-              onPress={() => handleOnDelete(habit.id)}
-              className="bg-red-700 flex-1"
-            />
-            <Button
-              text={habit.completed ? "Undone" : "Done"}
-              onPress={handleOnToggle}
-              className="flex-1"
-            />
-          </View>
+      <View className="bg-gray-200 rounded-2xl gap-4 w-full max-w-96 p-4">
+        <EditableText
+          onChangeText={setEditableTitle}
+          text={editableTitle}
+          className={`font-bold text-5xl ${
+            habit.completed && "complete-habit"
+          }`}
+        />
+        <EditableText
+          onChangeText={setEditableDescription}
+          text={editableDescription}
+        />
+        <View className="flex-row gap-2">
+          <Button
+            text="Delete"
+            onPress={() => handleOnDelete(habit.id)}
+            className="bg-red-700 flex-1"
+          />
+          <Button
+            text={habit.completed ? "Undone" : "Done"}
+            onPress={handleOnToggle}
+            className="flex-1"
+          />
         </View>
-      ) : (
-        <View>
-          <Text>Not found.</Text>
-        </View>
-      )}
+      </View>
     </Modal>
   );
 };

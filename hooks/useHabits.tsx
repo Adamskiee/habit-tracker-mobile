@@ -13,8 +13,9 @@ interface HabitsContextType {
   setHabits: React.Dispatch<React.SetStateAction<HabitList[]>>;
   getHabit: (id: string) => HabitList | undefined;
   addHabit: (title: string, description: string) => void;
-  toggleHabit: (id: string) => void;
-  deleteHabit: (id: string) => void;
+  toggleHabit: (id: string) => Promise<void>;
+  deleteHabit: (id: string) => Promise<void>;
+  updateHabit: (id: string, habit: HabitEditProps) => Promise<void>;
   loading: boolean;
   error: Error | null;
   activeHabit: string;
@@ -47,6 +48,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // CREATE
   const addHabit = async (title: string, description: string) => {
     try {
       setLoading(true);
@@ -62,6 +64,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // DELETE
   const deleteHabit = async (id: string) => {
     try {
       await HabitStorageService.deteteHabit(id);
@@ -71,6 +74,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // READ
   const getHabit = (id: string) => {
     try {
       return habits.find((habit) => habit.id === id);
@@ -80,9 +84,19 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  // UPDATE
   const toggleHabit = async (id: string) => {
     try {
       await HabitStorageService.toggleHabitCompletion(id);
+      await loadHabits();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const updateHabit = async (id: string, habit: HabitEditProps) => {
+    try {
+      await HabitStorageService.updateHabit(id, habit);
       await loadHabits();
     } catch (error) {
       console.error(error);
@@ -102,6 +116,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
         activeHabit,
         setActiveHabit,
         deleteHabit,
+        updateHabit,
       }}
     >
       {children}

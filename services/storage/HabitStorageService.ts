@@ -69,7 +69,7 @@ class HabitStorageService {
   // UPDATE
   async updateHabit(
     id: string,
-    updates: { title?: string; description?: string; completed?: boolean }
+    updates: HabitEditProps
   ): Promise<{ success: boolean; message: string }> {
     try {
       const habits = await this.getAllHabits();
@@ -89,6 +89,7 @@ class HabitStorageService {
         ...preserved,
         ...updates,
       };
+      console.log(updatedHabit);
 
       const updatedhabits = [...habits];
       updatedhabits[habitIndex] = updatedHabit;
