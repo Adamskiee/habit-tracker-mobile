@@ -1,5 +1,6 @@
 import AddHabitModal from "@/components/AddHabitModal";
 import HabitItem from "@/components/HabitItem";
+import Button from "@/components/ui/Button";
 import Fab from "@/components/ui/Fab";
 import ViewHabitModal from "@/components/ViewHabitModal";
 import { useHabits } from "@/hooks/useHabits";
@@ -7,7 +8,7 @@ import { useState } from "react";
 import { FlatList, Text, View } from "react-native";
 
 export default function Index() {
-  const { habits} = useHabits();
+  const { habits } = useHabits();
   const [activeModal, setActiveModal] = useState<ModalType>("none");
 
   return (
@@ -25,15 +26,26 @@ export default function Index() {
             />
           )}
           keyExtractor={(item) => item.id.toString()}
-          ListEmptyComponent={<Text className="mx-auto">No Habits.</Text>}
+          ListEmptyComponent={
+            <View className="min-h-96 justify-center items-center gap-8">
+              <Text className="text-5xl">No Habits.</Text>
+              <Button onPress={() => setActiveModal("add-habit")} text="Add habit" className="p-6 rounded-3xl" textClassName="text-3xl"/> 
+            </View>
+          }
           contentContainerStyle={{
             gap: 12,
           }}
         />
       }
       <Fab onPress={() => setActiveModal("add-habit")} />
-      <AddHabitModal visible={activeModal === "add-habit"} setActiveModal={setActiveModal} />
-      <ViewHabitModal visible={activeModal === "habit-item"} setActiveModal={setActiveModal}/>
+      <AddHabitModal
+        visible={activeModal === "add-habit"}
+        setActiveModal={setActiveModal}
+      />
+      <ViewHabitModal
+        visible={activeModal === "habit-item"}
+        setActiveModal={setActiveModal}
+      />
     </View>
   );
 }
