@@ -1,10 +1,10 @@
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { db } from "@/config/firebase";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   collection,
-  getDocs,
-  DocumentData,
   CollectionReference,
+  DocumentData,
+  getDocs,
 } from "firebase/firestore";
 
 class HabitStorageService {
@@ -18,12 +18,15 @@ class HabitStorageService {
 
   // READ
   async getAllHabits(): Promise<(Habit & { id: string })[]> {
-    const snapshot = await getDocs(this.habitsRef);
-
-    return snapshot.docs.map((doc) => ({
-      id: doc.id,
-      ...(doc.data() as Habit),
-    }));
+    try {
+      const snapshot = await getDocs(this.habitsRef);
+      return snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...(doc.data() as Habit),
+      }));
+    } catch (error) {
+      throw error;
+    }
   }
 
   async getHabitById(id: string): Promise<Habit | null> {

@@ -30,7 +30,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   const [error, setError] = useState<Error | null>(null);
   // for habit view modal in index.tsx to know what is the pressed habit item
   const [activeHabit, setActiveHabit] = useState("");
-  
+
   useEffect(() => {
     loadHabits();
   }, []);
@@ -39,8 +39,10 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       const loadedHabits = await HabitStorageService.getAllHabits();
+      console.log("haha")
       setHabits(loadedHabits);
     } catch (error) {
+      console.error(error)
       setError(error instanceof Error ? error : new Error("An error occured"));
     } finally {
       setLoading(false);
