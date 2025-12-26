@@ -1,10 +1,14 @@
 import { db } from "@/config/firebase";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   collection,
   CollectionReference,
   DocumentData,
   getDocs,
+  getDoc,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 class HabitStorageService {
@@ -31,8 +35,16 @@ class HabitStorageService {
 
   async getHabitById(id: string): Promise<Habit | null> {
     try {
-      const habits = await this.getAllHabits();
-      return habits.find((habit) => habit.id === id) || null;
+      const ref = doc(db, "habits", id);
+      const snapshot = await getDoc(ref);
+
+      if (snapshot.exists()) {
+        return {
+          ...(snapshot.data() as Habit),
+        };
+      }
+
+      return null;
     } catch (error) {
       throw error;
     }
@@ -44,18 +56,10 @@ class HabitStorageService {
     description: string;
   }): Promise<{ success: boolean; message: string }> {
     try {
-      const habits = await this.getAllHabits();
-
-      const habitsWithMetaData = {
+      await addDoc(this.habitsRef, {
         ...newHabit,
-        id: this.generateUUID(),
-        completed: false,
-      };
-
-      const updatedHabits = [...habits, habitsWithMetaData];
-
-      this.saveAllHabits(updatedHabits);
-
+        completed: false
+      });
       return {
         success: true,
         message: "Created successfully",
@@ -76,29 +80,10 @@ class HabitStorageService {
     updates: HabitEditProps
   ): Promise<{ success: boolean; message: string }> {
     try {
-      const habits = await this.getAllHabits();
-      const habitIndex = habits.findIndex((todo) => todo.id === id);
 
-      if (habitIndex === -1) {
-        return {
-          success: false,
-          message: "Habit not found",
-        };
-      }
-
-      const { id: habitId, ...preserved } = habits[habitIndex];
-
-      const updatedHabit = {
-        id: habitId,
-        ...preserved,
-        ...updates,
-      };
-      console.log(updatedHabit);
-
-      const updatedhabits = [...habits];
-      updatedhabits[habitIndex] = updatedHabit;
-
-      await this.saveAllHabits(updatedhabits);
+      await updateDoc(doc(db, "habits", id), {
+        ...updates
+      })
 
       return {
         success: true,
@@ -118,6 +103,7 @@ class HabitStorageService {
   ): Promise<{ success: boolean; message: string }> {
     try {
       const habit = await this.getHabitById(id);
+
       if (!habit) {
         return {
           success: false,
@@ -128,7 +114,7 @@ class HabitStorageService {
       await this.updateHabit(id, {
         completed: !habit.completed,
       });
-      console.log("toggled");
+
       return {
         success: true,
         message: "Toggle habit successfully",
@@ -139,38 +125,13 @@ class HabitStorageService {
     }
   }
 
-  async saveAllHabits(habits: Habit[]): Promise<void> {
-    try {
-      const jsonValue = JSON.stringify(habits);
-      await AsyncStorage.setItem(this.habitsKey, jsonValue);
-    } catch (error) {
-      throw error;
-    }
-  }
-
   // DELETE
   async deteteHabit(id: string): Promise<void> {
     try {
-      const habits = await this.getAllHabits();
-
-      const updatedHabits = habits.filter((habit) => habit.id !== id);
-
-      await this.saveAllHabits(updatedHabits);
+      await deleteDoc(doc(db, "habits", id));
     } catch (error) {
       throw error;
     }
-  }
-
-  // UTILITIES
-  generateUUID() {
-    return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(
-      /[xy]/g,
-      function (c) {
-        const r = (Math.random() * 16) | 0;
-        const v = c === "x" ? r : (r & 0x3) | 0x8;
-        return v.toString(16);
-      }
-    );
   }
 }
 
