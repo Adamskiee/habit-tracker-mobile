@@ -9,7 +9,7 @@ import {
 import { HabitStorageService } from "@/services";
 
 interface HabitsContextType {
-  habits: HabitList[];
+  habits: (Habit & { id: string })[];
   setHabits: React.Dispatch<React.SetStateAction<HabitList[]>>;
   getHabit: (id: string) => HabitList | undefined;
   addHabit: (title: string, description: string) => void;
@@ -25,12 +25,12 @@ interface HabitsContextType {
 const HabitsContext = createContext<HabitsContextType | undefined>(undefined);
 
 export const HabitsProvider = ({ children }: { children: ReactNode }) => {
-  const [habits, setHabits] = useState<HabitList[]>([]);
+  const [habits, setHabits] = useState<(Habit & { id: string })[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   // for habit view modal in index.tsx to know what is the pressed habit item
   const [activeHabit, setActiveHabit] = useState("");
-
+  
   useEffect(() => {
     loadHabits();
   }, []);
@@ -39,7 +39,6 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       const loadedHabits = await HabitStorageService.getAllHabits();
-
       setHabits(loadedHabits);
     } catch (error) {
       setError(error instanceof Error ? error : new Error("An error occured"));

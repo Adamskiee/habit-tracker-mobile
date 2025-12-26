@@ -1,28 +1,29 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-interface Habit {
-  title: string;
-  description: string;
-  completed: boolean;
-  id: string;
-}
+import { db } from "@/config/firebase";
+import {
+  collection,
+  getDocs,
+  DocumentData,
+  CollectionReference,
+} from "firebase/firestore";
 
 class HabitStorageService {
   private habitsKey: string;
+  private habitsRef: CollectionReference<Habit, DocumentData>;
 
   constructor() {
     this.habitsKey = "@habits";
+    this.habitsRef = collection(db, "habits") as CollectionReference<Habit>;
   }
 
   // READ
-  async getAllHabits(): Promise<Habit[] | []> {
-    try {
-      const jsonValue = await AsyncStorage.getItem(this.habitsKey);
-      return jsonValue != null ? JSON.parse(jsonValue) : [];
-    } catch (error) {
-      console.error(`Error getting all habits: ${error}`);
-      return [];
-    }
+  async getAllHabits(): Promise<(Habit & { id: string })[]> {
+    const snapshot = await getDocs(this.habitsRef);
+
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...(doc.data() as Habit),
+    }));
   }
 
   async getHabitById(id: string): Promise<Habit | null> {

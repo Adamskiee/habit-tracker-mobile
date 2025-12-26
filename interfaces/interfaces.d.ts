@@ -12,3 +12,9 @@ interface HabitEditProps {
   description?: string;
   completed?: boolean;
 }
+
+interface Habit {
+  title: string;
+  description: string;
+  completed: boolean;
+}
