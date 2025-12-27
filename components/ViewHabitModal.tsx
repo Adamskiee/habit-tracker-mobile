@@ -30,11 +30,11 @@ const ViewHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
   }
 
   const handleOnToggle = () => {
-    toggleHabit(activeHabit);
+    toggleHabit(activeHabit ?? null);
     setActiveModal("none");
   };
 
-  const handleOnDelete = (id: string) => {
+  const handleOnDelete = (id: number) => {
     deleteHabit(id);
     setActiveModal("none");
   };

@@ -9,27 +9,27 @@ import {
 import { HabitStorageService } from "@/services";
 
 interface HabitsContextType {
-  habits: (Habit & { id: string })[];
+  habits: Habit[];
   setHabits: React.Dispatch<React.SetStateAction<HabitList[]>>;
-  getHabit: (id: string) => HabitList | undefined;
+  getHabit: (id: number) => HabitList | undefined;
   addHabit: (title: string, description: string) => void;
-  toggleHabit: (id: string) => Promise<void>;
-  deleteHabit: (id: string) => Promise<void>;
-  updateHabit: (id: string, habit: HabitEditProps) => Promise<void>;
+  toggleHabit: (id: number) => Promise<void>;
+  deleteHabit: (id: number) => Promise<void>;
+  updateHabit: (id: number, habit: HabitEditProps) => Promise<void>;
   loading: boolean;
   error: Error | null;
-  activeHabit: string;
-  setActiveHabit: React.Dispatch<React.SetStateAction<string>>;
+  activeHabit: number;
+  setActiveHabit: React.Dispatch<React.SetStateAction<number>>;
 }
 
 const HabitsContext = createContext<HabitsContextType | undefined>(undefined);
 
 export const HabitsProvider = ({ children }: { children: ReactNode }) => {
-  const [habits, setHabits] = useState<(Habit & { id: string })[]>([]);
+  const [habits, setHabits] = useState<Habit[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Error | null>(null);
   // for habit view modal in index.tsx to know what is the pressed habit item
-  const [activeHabit, setActiveHabit] = useState("");
+  const [activeHabit, setActiveHabit] = useState<number>(-1);
 
   useEffect(() => {
     loadHabits();
@@ -39,10 +39,10 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       const loadedHabits = await HabitStorageService.getAllHabits();
-      console.log("haha")
+      console.log("haha");
       setHabits(loadedHabits);
     } catch (error) {
-      console.error(error)
+      console.error(error);
       setError(error instanceof Error ? error : new Error("An error occured"));
     } finally {
       setLoading(false);
@@ -66,7 +66,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // DELETE
-  const deleteHabit = async (id: string) => {
+  const deleteHabit = async (id: number) => {
     try {
       await HabitStorageService.deteteHabit(id);
       await loadHabits();
@@ -76,7 +76,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // READ
-  const getHabit = (id: string) => {
+  const getHabit = (id: number) => {
     try {
       return habits.find((habit) => habit.id === id);
     } catch (error) {
@@ -86,7 +86,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   };
 
   // UPDATE
-  const toggleHabit = async (id: string) => {
+  const toggleHabit = async (id: number) => {
     try {
       await HabitStorageService.toggleHabitCompletion(id);
       await loadHabits();
@@ -95,7 +95,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const updateHabit = async (id: string, habit: HabitEditProps) => {
+  const updateHabit = async (id: number, habit: HabitEditProps) => {
     try {
       await HabitStorageService.updateHabit(id, habit);
       await loadHabits();

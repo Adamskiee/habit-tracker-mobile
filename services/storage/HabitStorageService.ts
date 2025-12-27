@@ -1,50 +1,42 @@
-import { db } from "@/config/firebase";
-import {
-  collection,
-  CollectionReference,
-  DocumentData,
-  getDocs,
-  getDoc,
-  doc,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-} from "firebase/firestore";
+import * as SQLite from "expo-sqlite";
 
 class HabitStorageService {
-  private habitsKey: string;
-  private habitsRef: CollectionReference<Habit, DocumentData>;
+  private db: SQLite.SQLiteDatabase;
 
   constructor() {
-    this.habitsKey = "@habits";
-    this.habitsRef = collection(db, "habits") as CollectionReference<Habit>;
+    this.db = SQLite.openDatabaseSync("habits");
+    this.sqliteInit();
+  }
+
+  async sqliteInit() {
+    await this.db.runAsync(
+      `CREATE TABLE IF NOT EXISTS habits (
+      id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      title TEXT NOT NULL, 
+      description TEXT DEFAULT NULL, 
+      completed INTEGER CHECK(completed IN (0, 1)) NOT NULL DEFAULT "0", 
+      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP)`
+    );
   }
 
   // READ
-  async getAllHabits(): Promise<(Habit & { id: string })[]> {
+  async getAllHabits(): Promise<Habit[]> {
     try {
-      const snapshot = await getDocs(this.habitsRef);
-      return snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...(doc.data() as Habit),
-      }));
+      const habits = await this.db.getAllAsync<Habit>("SELECT * FROM habits");
+
+      return habits as Habit[];
     } catch (error) {
       throw error;
     }
   }
 
-  async getHabitById(id: string): Promise<Habit | null> {
+  async getHabitById(id: number): Promise<Habit | null> {
     try {
-      const ref = doc(db, "habits", id);
-      const snapshot = await getDoc(ref);
-
-      if (snapshot.exists()) {
-        return {
-          ...(snapshot.data() as Habit),
-        };
-      }
-
-      return null;
+      const habit = await this.db.getFirstAsync<Habit>(
+        "SELECT * FROM habits WHERE id = ?",
+        [id]
+      );
+      return habit || null;
     } catch (error) {
       throw error;
     }
@@ -53,13 +45,13 @@ class HabitStorageService {
   // CREATE
   async createHabit(newHabit: {
     title: string;
-    description: string;
+    description?: string;
   }): Promise<{ success: boolean; message: string }> {
     try {
-      await addDoc(this.habitsRef, {
-        ...newHabit,
-        completed: false
-      });
+      await this.db.runAsync(
+        "INSERT INTO habits(title, description) VALUES (?, ?)",
+        [newHabit.title, newHabit.description ?? null]
+      );
       return {
         success: true,
         message: "Created successfully",
@@ -76,14 +68,37 @@ class HabitStorageService {
 
   // UPDATE
   async updateHabit(
-    id: string,
+    id: number,
     updates: HabitEditProps
   ): Promise<{ success: boolean; message: string }> {
     try {
+      const fields: string[] = [];
+      const values: any[] = [];
 
-      await updateDoc(doc(db, "habits", id), {
-        ...updates
-      })
+      if (updates.title !== undefined) {
+        fields.push("title = ?");
+        values.push(updates.title);
+      }
+      if (updates.description !== undefined) {
+        fields.push("description = ?");
+        values.push(updates.description);
+      }
+      if (updates.completed !== undefined) {
+        fields.push("completed = ?");
+        values.push(updates.completed);
+      }
+      fields.push("updatedAt = CURRENT_TIMESTAMP")
+
+      values.push(id)
+
+      if(fields.length === 1) {
+        return {
+          success: false,
+          message: "No fields to update"
+        }
+      }
+      
+      await this.db.runAsync(`UPDATE habits SET ${fields.join(', ')} WHERE id = ?`, values);
 
       return {
         success: true,
@@ -99,7 +114,7 @@ class HabitStorageService {
   }
 
   async toggleHabitCompletion(
-    id: string
+    id: number
   ): Promise<{ success: boolean; message: string }> {
     try {
       const habit = await this.getHabitById(id);
@@ -126,9 +141,9 @@ class HabitStorageService {
   }
 
   // DELETE
-  async deteteHabit(id: string): Promise<void> {
+  async deteteHabit(id: number): Promise<void> {
     try {
-      await deleteDoc(doc(db, "habits", id));
+      await this.db.runAsync("DELETE FROM habits WHERE id = ?", [id])
     } catch (error) {
       throw error;
     }
