@@ -31,8 +31,12 @@ class FirestoreService {
   async pushDatas(collectionName: string, datas: Habit[]): Promise<void> {
     try {
       datas.forEach(async (data) => {
-        if (data.firestoreId) {
-          const docRef = doc(db, collectionName, data.firestoreId);
+        if (data["firestore_id"]) {
+          console.log(`[FIRESTORE]: updating data...`);
+          console.log(`[FIRESTORE]: data: `);
+          console.log(data);
+          
+          const docRef = doc(db, collectionName, data.firestore_id);
           await setDoc(
             docRef,
             {
@@ -40,16 +44,23 @@ class FirestoreService {
             },
             { merge: true }
           );
+          console.log(`[FIRESTORE]: updated data...`);
         } else {
+          console.log(`[FIRESTORE]: adding data...`);
+          console.log(`[FIRESTORE]: data: `);
+          console.log(data);
+          
           const docRef = await addDoc(collection(db, collectionName), {
             ...data,
           });
+
           const newFirestoreId = docRef.id;
           if (collectionName === "habits") {
             HabitStorageService.updateHabit(data.id, {
-              firestoreId: newFirestoreId,
+              firestore_id: newFirestoreId,
             });
           }
+          console.log(`[FIRESTORE]: added data`);
         }
       });
     } catch (error) {

@@ -116,25 +116,28 @@ class HabitStorageService {
       if (updates.title !== undefined) {
         fields.push("title = ?");
         values.push(updates.title);
+        fields.push("isSync = 0");
       }
       if (updates.description !== undefined) {
         fields.push("description = ?");
         values.push(updates.description);
+        fields.push("isSync = 0");
       }
       if (updates.completed !== undefined) {
         fields.push("completed = ?");
         values.push(updates.completed);
+        fields.push("isSync = 0");
       }
-      if (updates.firestoreId !== undefined) {
+      if (updates.firestore_id !== undefined) {
         fields.push("firestore_id = ?");
-        values.push(updates.firestoreId);
+        values.push(updates.firestore_id);
       }
       if (updates.isSync !== undefined) {
         fields.push("isSync = ?");
         values.push(updates.isSync);
-      }
-      fields.push("updatedAt = CURRENT_TIMESTAMP");
+      }      
 
+      fields.push("updatedAt = CURRENT_TIMESTAMP");
       values.push(id);
 
       if (fields.length === 1) {

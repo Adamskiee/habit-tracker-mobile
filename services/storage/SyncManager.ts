@@ -14,7 +14,8 @@ class SyncManager {
         console.log("[SYNC]: Getting all data from firestore...");
         const allHabits = await FirestoreService.getAll("habits");
         if (allHabits.length > 0) {
-          console.log(`[SYNC]: Data: ${allHabits}`);
+          console.log(`[SYNC]: Data:`);
+          console.log(allHabits);
           console.log("[SYNC]: Fetch datas to SQLite");
           await SQLiteService.fetchAll("habit", allHabits);
           console.log(`[SYNC]: Updated last sync`);
@@ -26,7 +27,8 @@ class SyncManager {
         if (!lastSync) {
           console.log("[SYNC]: Getting all data from firestore...");
           const allHabits = await FirestoreService.getAll("habits");
-          console.log(`[SYNC]: Data: ${allHabits}`);
+          console.log(`[SYNC]: Data:`);
+          console.log(allHabits);
 
           if (allHabits.length > 0) {
             console.log("[SYNC]: Fetching data to the SQLite...");
@@ -41,7 +43,8 @@ class SyncManager {
             "habits",
             lastSync
           );
-          console.log(`[SYNC]: Unsync data: ${changedData}`);
+          console.log(`[SYNC]: Unsync data: `);
+          console.log(changedData);
           if (changedData.length > 0) {
             console.log(`[SYNC]: Updating datas...`);
             console.log(`[SYNC]: Updated data`);
@@ -63,8 +66,9 @@ class SyncManager {
       console.log(`[SYNC]: Start push local changes`);
       console.log(`[SYNC]: Getting all unsync habits...`);
       const allHabits = await HabitStorageService.getAllUnsyncHabits();
-      console.log(`[SYNC]: Unsync habits: ${allHabits}`);
-      
+      console.log(`[SYNC]: Unsync habits: `);
+      console.log(allHabits);
+
       if (allHabits.length < 1) {
         console.log(`[SYNC]: End`);
         return;
@@ -72,7 +76,8 @@ class SyncManager {
 
       console.log(`[SYNC]: Making all unsync habits to be sync...`);
       const syncedHabits = await HabitStorageService.makeHabitsSync(allHabits);
-      console.log(`[SYNC]: Done making habits to be sync: ${syncedHabits}`);
+      console.log(`[SYNC]: Done making habits to be sync: `);
+      console.log(allHabits);
 
       console.log(`[SYNC]: Pushing datas to the firestore...`);
       await FirestoreService.pushDatas("habits", syncedHabits);
