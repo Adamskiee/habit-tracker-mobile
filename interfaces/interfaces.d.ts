@@ -24,5 +24,6 @@ interface Habit {
   completed: boolean;
   updatedAt: string;
   firestore_id?: string;
+  isDeleted?: number;
   isSync: number;
 }

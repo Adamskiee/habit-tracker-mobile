@@ -17,10 +17,12 @@ class SQLiteService {
         title TEXT NOT NULL, 
         description TEXT DEFAULT NULL, 
         completed INTEGER CHECK(completed IN (0, 1)) NOT NULL DEFAULT "0", 
+        isDeleted INTEGER CHECK(isDeleted IN(0, 1)) NOT NULL DEFAULT "0",
         isSync INTEGER CHECK(isSync IN (0,1)) NOT NULL DEFAULT "0",
         updatedAt TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')))`);
     } catch (error) {
       console.error(error);
+      throw error;
     }
   }
 

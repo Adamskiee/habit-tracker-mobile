@@ -21,6 +21,7 @@ class HabitStorageService {
       title TEXT NOT NULL, 
       description TEXT DEFAULT NULL, 
       completed INTEGER CHECK(completed IN (0, 1)) NOT NULL DEFAULT "0", 
+      isDeleted INTEGER CHECK(isSync IN(0, 1)) NOT NULL DEFAULT "0",
       isSync INTEGER CHECK(isSync IN (0,1)) NOT NULL DEFAULT "0",
       updatedAt TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')))`
     );
@@ -29,7 +30,9 @@ class HabitStorageService {
   // READ
   async getAllHabits(): Promise<Habit[]> {
     try {
-      const habits = await this.db.getAllAsync<Habit>("SELECT * FROM habits");
+      const habits = await this.db.getAllAsync<Habit>(
+        "SELECT * FROM habits WHERE isDeleted = 0"
+      );
 
       return habits as Habit[];
     } catch (error) {
@@ -40,7 +43,7 @@ class HabitStorageService {
   async getHabitById(id: number): Promise<Habit | null> {
     try {
       const habit = await this.db.getFirstAsync<Habit>(
-        "SELECT * FROM habits WHERE id = ?",
+        "SELECT * FROM habits WHERE isDeleted = 0, id = ?",
         [id]
       );
       return habit || null;
@@ -53,7 +56,7 @@ class HabitStorageService {
   async getHabitsThatUpdatedBefore(date: Date): Promise<Habit[]> {
     try {
       const habits = await this.db.getAllAsync<Habit>(
-        "SELECT * FROM habits WHERE updatedAt > ?",
+        "SELECT * FROM habits WHERE isDeleted = 0 updatedAt > ?",
         [this.toSQLiteDateFormat()]
       );
 
@@ -135,7 +138,7 @@ class HabitStorageService {
       if (updates.isSync !== undefined) {
         fields.push("isSync = ?");
         values.push(updates.isSync);
-      }      
+      }
 
       fields.push("updatedAt = CURRENT_TIMESTAMP");
       values.push(id);
@@ -208,7 +211,7 @@ class HabitStorageService {
   // DELETE
   async deteteHabit(id: number): Promise<void> {
     try {
-      await this.db.runAsync("DELETE FROM habits WHERE id = ?", [id]);
+      await this.db.runAsync("UPDATE habits SET isDeleted = 1, isSync = 0 WHERE id = ?",[id] );
     } catch (error) {
       throw error;
     }
