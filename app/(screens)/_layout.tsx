@@ -47,6 +47,16 @@ const _Layout = () => {
           ),
         }}
       />
+      <Tabs.Screen
+        name="debug"
+        options={{
+          title: "Debug",
+          headerShown: false,
+          tabBarIcon: ({ focused }) => (
+            <TabIcon focused={focused} icon={icons.home} title="Debug" />
+          ),
+        }}
+      />
     </Tabs>
   );
 };

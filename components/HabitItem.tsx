@@ -5,7 +5,7 @@ import Button from "./ui/Button";
 
 interface HabitItemProps {
   title: string;
-  id: string;
+  id: number;
   completed: boolean;
   setActiveModal: React.Dispatch<React.SetStateAction<ModalType>>;
 }

@@ -4,12 +4,26 @@ import Button from "@/components/ui/Button";
 import Fab from "@/components/ui/Fab";
 import ViewHabitModal from "@/components/ViewHabitModal";
 import { useHabits } from "@/hooks/useHabits";
-import { useState } from "react";
+import SyncManager from "@/services/storage/SyncManager";
+import { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 
 export default function Index() {
   const { habits } = useHabits();
   const [activeModal, setActiveModal] = useState<ModalType>("none");
+
+  useEffect(() => {
+    const syncData = async () => {
+      try {
+        await SyncManager.startSync();
+        await SyncManager.pushLocalChanges();
+      } catch (error) {
+        console.error("Background sync error: ", error);
+      }
+    };
+    syncData();
+    // console.log("hello");
+  }, []);
 
   return (
     <View className="screen-view">
@@ -29,7 +43,12 @@ export default function Index() {
           ListEmptyComponent={
             <View className="min-h-96 justify-center items-center gap-8">
               <Text className="text-5xl">No Habits.</Text>
-              <Button onPress={() => setActiveModal("add-habit")} text="Add habit" className="p-6 rounded-3xl" textClassName="text-3xl"/> 
+              <Button
+                onPress={() => setActiveModal("add-habit")}
+                text="Add habit"
+                className="p-6 rounded-3xl"
+                textClassName="text-3xl"
+              />
             </View>
           }
           contentContainerStyle={{

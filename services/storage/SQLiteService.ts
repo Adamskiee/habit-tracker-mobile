@@ -1,0 +1,116 @@
+import * as SQLite from "expo-sqlite";
+import HabitStorageService from "./HabitStorageService";
+
+class SQLiteService {
+  private dbName = "habit-tracker";
+  private db: SQLite.SQLiteDatabase;
+
+  constructor() {
+    this.db = SQLite.openDatabaseSync(this.dbName);
+  }
+
+  async init(): Promise<void> {
+    try {
+      await this.db.runAsync(`CREATE TABLE IF NOT EXISTS habits (
+        id INTEGER PRIMARY KEY AUTOINCREMENT, 
+        firestore_id TEXT UNIQUE,
+        title TEXT NOT NULL, 
+        description TEXT DEFAULT NULL, 
+        completed INTEGER CHECK(completed IN (0, 1)) NOT NULL DEFAULT "0", 
+        isSync INTEGER CHECK(isSync IN (0,1)) NOT NULL DEFAULT "0",
+        updatedAt TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')))`);
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // TODO: rename considering that there is an habit created
+  // fetch unsync data to the sqlite
+  async fetchAll(
+    tableName: string,
+    datas: (Habit & {
+      firestoreId: string;
+    })[]
+  ): Promise<void> {
+    try {
+      if (tableName === "habits") {
+        datas.forEach((data) => {
+          HabitStorageService.createHabit(data);
+        });
+      }
+    } catch (error) {
+      console.error("Error fetching data to SQLite: ", error);
+      throw error;
+    }
+  }
+  // Update records
+
+  async update(
+    tableName: string,
+    datas: (Habit & { firestoreId: string })[]
+  ): Promise<void> {
+    try {
+      if (tableName === "habits") {
+        datas.forEach((data) => {
+          // TODO: update the specific records that is changed
+          HabitStorageService.updateHabit(data.id, data);
+        });
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  // Check if there is no records in the database
+  async isDatabaseEmpty(): Promise<boolean> {
+    try {
+      await this.init();
+      const result = await this.db.getFirstAsync<{ count: number }>(
+        "SELECT COUNT(*) as count FROM habits"
+      );
+      return result?.count === 0;
+    } catch (error) {
+      console.error("Error checking SQLite database: ", error);
+      return true;
+    }
+  }
+
+  async isInitialized(): Promise<boolean> {
+    try {
+      const result = await this.db.getFirstAsync<{ name: string }>(
+        `SELECT name FROM sqlite_master WHERE type='table' AND name='habits'`
+      );
+      return result !== null;
+    } catch (error) {
+      console.error("Error checking initialization:", error);
+      return false;
+    }
+  }
+
+  async deleteDatabase(): Promise<void> {
+    try {
+      await this.db.closeAsync();
+
+      await HabitStorageService.closeDatabase();
+
+      await SQLite.deleteDatabaseAsync(this.dbName);
+
+      this.db = SQLite.openDatabaseSync(this.dbName);
+      await this.init();
+
+      await HabitStorageService.reopenDatabase();
+    } catch (error) {
+      console.error("Error deleting database: ", error);
+    }
+  }
+
+  async deleteTable(tableName: string): Promise<void> {
+    try {
+      await this.db.runAsync("DROP TABLE IF EXISTS habits");
+    } catch (error) {
+      console.error(error);
+    }
+  }
+}
+
+export default new SQLiteService();

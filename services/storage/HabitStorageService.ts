@@ -4,18 +4,25 @@ class HabitStorageService {
   private db: SQLite.SQLiteDatabase;
 
   constructor() {
-    this.db = SQLite.openDatabaseSync("habits");
+    this.db = SQLite.openDatabaseSync("habit-tracker");
     this.sqliteInit();
+  }
+
+  // Helper function
+  private toSQLiteDateFormat(date: Date = new Date()): string {
+    return date.toISOString().replace("T", "").slice(0, 19);
   }
 
   async sqliteInit() {
     await this.db.runAsync(
       `CREATE TABLE IF NOT EXISTS habits (
       id INTEGER PRIMARY KEY AUTOINCREMENT, 
+      firestore_id TEXT UNIQUE,
       title TEXT NOT NULL, 
       description TEXT DEFAULT NULL, 
       completed INTEGER CHECK(completed IN (0, 1)) NOT NULL DEFAULT "0", 
-      updatedAt DATETIME DEFAULT CURRENT_TIMESTAMP)`
+      isSync INTEGER CHECK(isSync IN (0,1)) NOT NULL DEFAULT "0",
+      updatedAt TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')))`
     );
   }
 
@@ -42,10 +49,41 @@ class HabitStorageService {
     }
   }
 
+  // TODO: change function name indicating that also habit that is created
+  async getHabitsThatUpdatedBefore(date: Date): Promise<Habit[]> {
+    try {
+      const habits = await this.db.getAllAsync<Habit>(
+        "SELECT * FROM habits WHERE updatedAt > ?",
+        [this.toSQLiteDateFormat()]
+      );
+
+      return habits as Habit[];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async getAllUnsyncHabits(): Promise<Habit[]> {
+    try {
+      const habits = await this.db.getAllAsync<Habit>(
+        "SELECT * FROM habits WHERE isSync = ?",
+        [0]
+      );
+
+      return habits as Habit[];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   // CREATE
   async createHabit(newHabit: {
     title: string;
     description?: string;
+    id?: number;
+    firestoreId?: string;
+    completed?: boolean;
+    updatedAt?: string;
   }): Promise<{ success: boolean; message: string }> {
     try {
       await this.db.runAsync(
@@ -87,29 +125,38 @@ class HabitStorageService {
         fields.push("completed = ?");
         values.push(updates.completed);
       }
-      fields.push("updatedAt = CURRENT_TIMESTAMP")
+      if (updates.firestoreId !== undefined) {
+        fields.push("firestore_id = ?");
+        values.push(updates.firestoreId);
+      }
+      if (updates.isSync !== undefined) {
+        fields.push("isSync = ?");
+        values.push(updates.isSync);
+      }
+      fields.push("updatedAt = CURRENT_TIMESTAMP");
 
-      values.push(id)
+      values.push(id);
 
-      if(fields.length === 1) {
+      if (fields.length === 1) {
         return {
           success: false,
-          message: "No fields to update"
-        }
+          message: "No fields to update",
+        };
       }
-      
-      await this.db.runAsync(`UPDATE habits SET ${fields.join(', ')} WHERE id = ?`, values);
+
+      console.log("[SQLite]: Updating DB...");
+      await this.db.runAsync(
+        `UPDATE habits SET ${fields.join(", ")} WHERE id = ?`,
+        values
+      );
+      console.log("[SQLite]: Updated DB");
 
       return {
         success: true,
         message: "Updated successfully",
       };
     } catch (error) {
-      console.error(error);
-      return {
-        success: false,
-        message: "Updating error",
-      };
+      throw error;
     }
   }
 
@@ -140,12 +187,56 @@ class HabitStorageService {
     }
   }
 
+  async makeHabitsSync(habits: Habit[]): Promise<Habit[]> {
+    try {
+      habits.forEach(
+        async (habit) => await this.updateHabit(habit.id, { isSync: 1 })
+      );
+
+      const syncHabits = habits.map((habit) => ({ ...habit, isSync: 1 }));
+
+      return syncHabits;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  }
+
   // DELETE
   async deteteHabit(id: number): Promise<void> {
     try {
-      await this.db.runAsync("DELETE FROM habits WHERE id = ?", [id])
+      await this.db.runAsync("DELETE FROM habits WHERE id = ?", [id]);
     } catch (error) {
       throw error;
+    }
+  }
+
+  async deleteAllhabit(): Promise<void> {
+    try {
+      await this.db.runAsync("DELETE FROM habits");
+    } catch (error) {
+      console.error("Error deleting all habit: ", error);
+      throw error;
+    }
+  }
+
+  // DATABASE UTILITIES
+  // to close database
+  async closeDatabase(): Promise<void> {
+    try {
+      await this.db.closeAsync();
+    } catch (error) {
+      console.error("Error closing database:", error);
+    }
+  }
+
+  // to reopen database
+  async reopenDatabase(): Promise<void> {
+    try {
+      this.db = SQLite.openDatabaseSync("habit-tracker");
+      await this.sqliteInit();
+    } catch (error) {
+      console.error("Error reopening database:", error);
     }
   }
 }

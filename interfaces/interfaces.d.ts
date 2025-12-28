@@ -13,6 +13,8 @@ interface HabitEditProps {
   description?: string;
   completed?: boolean;
   updatedAt?: string;
+  firestoreId?: string;
+  isSync?: number;
 }
 
 interface Habit {
@@ -21,4 +23,6 @@ interface Habit {
   description: string;
   completed: boolean;
   updatedAt: string;
+  firestoreId?: string;
+  isSync: number;
 }

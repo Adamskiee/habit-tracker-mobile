@@ -10,12 +10,13 @@ import { HabitStorageService } from "@/services";
 
 interface HabitsContextType {
   habits: Habit[];
-  setHabits: React.Dispatch<React.SetStateAction<HabitList[]>>;
+  setHabits: React.Dispatch<React.SetStateAction<Habit[]>>;
   getHabit: (id: number) => HabitList | undefined;
   addHabit: (title: string, description: string) => void;
   toggleHabit: (id: number) => Promise<void>;
   deleteHabit: (id: number) => Promise<void>;
   updateHabit: (id: number, habit: HabitEditProps) => Promise<void>;
+  deleteAllHabits: () => Promise<void>;
   loading: boolean;
   error: Error | null;
   activeHabit: number;
@@ -39,7 +40,6 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     try {
       setLoading(true);
       const loadedHabits = await HabitStorageService.getAllHabits();
-      console.log("haha");
       setHabits(loadedHabits);
     } catch (error) {
       console.error(error);
@@ -75,6 +75,14 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const deleteAllHabits = async () => {
+    try {
+      await HabitStorageService.deleteAllhabit();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   // READ
   const getHabit = (id: number) => {
     try {
@@ -100,7 +108,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
       await HabitStorageService.updateHabit(id, habit);
       await loadHabits();
     } catch (error) {
-      console.error(error);
+      console.error("Error updating habits: ", error);
     }
   };
 
@@ -118,6 +126,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
         setActiveHabit,
         deleteHabit,
         updateHabit,
+        deleteAllHabits,
       }}
     >
       {children}
