@@ -39,7 +39,6 @@ class FirestoreService {
       console.log(`[FIRESTORE]: Pushing datas to ${collectionName}...`);
       datas.forEach(async (data) => {
         if (data["firestore_id"]) {
-          
           const docRef = doc(db, collectionName, data.firestore_id);
           await setDoc(
             docRef,
@@ -49,11 +48,10 @@ class FirestoreService {
             { merge: true }
           );
         } else {
-          
           const docRef = await addDoc(collection(db, collectionName), {
             ...data,
           });
-          
+
           const newFirestoreId = docRef.id;
           if (collectionName === "habits") {
             HabitStorageService.updateHabit(data.id, {

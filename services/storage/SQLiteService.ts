@@ -93,6 +93,11 @@ class SQLiteService {
     }
   }
 
+  // Helper function
+  private toSQLiteDateFormat(date: Date = new Date()): string {
+    return date.toISOString().replace("T", "").slice(0, 19);
+  }
+
   async deleteDatabase(): Promise<void> {
     try {
       await this.db.closeAsync();

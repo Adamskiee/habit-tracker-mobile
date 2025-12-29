@@ -8,11 +8,6 @@ class HabitStorageService {
     this.sqliteInit();
   }
 
-  // Helper function
-  private toSQLiteDateFormat(date: Date = new Date()): string {
-    return date.toISOString().replace("T", "").slice(0, 19);
-  }
-
   async sqliteInit() {
     await this.db.runAsync(
       `CREATE TABLE IF NOT EXISTS habits (
@@ -49,20 +44,6 @@ class HabitStorageService {
       return habit || null;
     } catch (error) {
       console.error("[SQLITE]: Error getting habit: ", error);
-      throw error;
-    }
-  }
-
-  // TODO: change function name indicating that also habit that is created
-  async getHabitsThatUpdatedBefore(date: Date): Promise<Habit[]> {
-    try {
-      const habits = await this.db.getAllAsync<Habit>(
-        "SELECT * FROM habits WHERE isDeleted = 0 updatedAt > ?",
-        [this.toSQLiteDateFormat()]
-      );
-
-      return habits as Habit[];
-    } catch (error) {
       throw error;
     }
   }
