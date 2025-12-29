@@ -19,6 +19,14 @@ const DebugScreen = () => {
     }
   };
 
+  const handleCreateTable = async () => {
+    try {
+      await SQLiteService.init();
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   return (
     <View className="screen-view">
       <View className="flex-1 gap-4">
@@ -27,6 +35,9 @@ const DebugScreen = () => {
         </Pressable>
         <Pressable className="btn" onPress={() => handleDeleteTable("habits")}>
           <Text>Delete Habits Table</Text>
+        </Pressable>
+        <Pressable className="btn" onPress={handleCreateTable}>
+          <Text>Create Habits Table</Text>
         </Pressable>
       </View>
     </View>

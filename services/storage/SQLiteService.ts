@@ -122,6 +122,7 @@ class SQLiteService {
       console.error(error);
     }
   }
+
 }
 
 export default new SQLiteService();
