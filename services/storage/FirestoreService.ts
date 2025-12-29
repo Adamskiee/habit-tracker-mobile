@@ -1,12 +1,13 @@
 import { db } from "@/config/firebase";
 import {
+  addDoc,
   collection,
-  where,
+  doc,
   getDocs,
   query,
-  doc,
   setDoc,
-  addDoc,
+  Timestamp,
+  where,
 } from "firebase/firestore";
 import HabitStorageService from "./HabitStorageService";
 
@@ -44,12 +45,14 @@ class FirestoreService {
             docRef,
             {
               ...data,
+              updatedAt: Timestamp.fromDate(new Date(data.updatedAt)),
             },
             { merge: true }
           );
         } else {
           const docRef = await addDoc(collection(db, collectionName), {
             ...data,
+            updatedAt: Timestamp.fromDate(new Date(data.updatedAt)),
           });
 
           const newFirestoreId = docRef.id;
@@ -76,14 +79,16 @@ class FirestoreService {
       console.log(
         `[FIRESTORE]: Getting all unsync data in ${collectionName}...`
       );
+      console.log(lastSyncTime)
       const q = query(
         collection(db, collectionName),
-        where("updatedAt", ">", lastSyncTime)
+        where("updatedAt", "<", Timestamp.fromDate(lastSyncTime))
       );
       const snapshot = await getDocs(q);
       const data = snapshot.docs.map((doc) => ({
         firestoreId: doc.id,
         ...(doc.data() as Habit),
+        updatedAt: doc.data().updatedAt.toDate().toISOString(),
       }));
       console.log(`[FIRESTORE]: All unsync data in ${collectionName}: `);
       console.log(data);

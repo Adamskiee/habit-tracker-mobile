@@ -26,6 +26,7 @@ class SyncManager {
             this.setLastSyncTime();
           }
         } else {
+          console.log(lastSync);
           const changedData = await FirestoreService.getAllUnsync(
             "habits",
             lastSync
@@ -63,10 +64,12 @@ class SyncManager {
     }
   }
 
-  async setLastSyncTime(date: Date = new Date()) {
+  async setLastSyncTime() {
     try {
+      const date = new Date().toISOString();
       console.log(`[SYNC]: Set last sync time to: ${date}`);
-      await AsyncStorage.setItem(this.LAST_SYNC_KEY, date.toISOString());
+      console.log(date);
+      await AsyncStorage.setItem(this.LAST_SYNC_KEY, date);
     } catch (error) {
       console.error(error);
       throw error;
@@ -76,8 +79,15 @@ class SyncManager {
   async getLastSyncTime() {
     try {
       const timestamp = await AsyncStorage.getItem(this.LAST_SYNC_KEY);
-      console.log(`[SYNC]: Last sync time: ${timestamp}`);
-      return timestamp ? new Date(timestamp) : null;
+
+      if (!timestamp) return null;
+
+      const date = new Date(timestamp);
+
+      console.log(`[SYNC]: Last sync time (stored): ${timestamp}`);
+      console.log(`[SYNC]: Last sync time (Date): ${date.toISOString()}`);
+      
+      return date;
     } catch (error) {
       console.error(error);
       throw error;

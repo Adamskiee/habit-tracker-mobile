@@ -19,7 +19,7 @@ class SQLiteService {
         completed INTEGER CHECK(completed IN (0, 1)) NOT NULL DEFAULT "0", 
         isDeleted INTEGER CHECK(isDeleted IN(0, 1)) NOT NULL DEFAULT "0",
         isSync INTEGER CHECK(isSync IN (0,1)) NOT NULL DEFAULT "0",
-        updatedAt TEXT DEFAULT (strftime('%Y-%m-%d %H:%M:%S', 'now')))`);
+        updatedAt TEXT DEFAULT (datetime('now')))`);
     } catch (error) {
       console.error(error);
       throw error;
@@ -94,8 +94,8 @@ class SQLiteService {
   }
 
   // Helper function
-  private toSQLiteDateFormat(date: Date = new Date()): string {
-    return date.toISOString().replace("T", "").slice(0, 19);
+  toSQLiteDateFormat(date: Date = new Date()): string {
+    return date.toISOString().replace("T", " ").slice(0, 19);
   }
 
   async deleteDatabase(): Promise<void> {
