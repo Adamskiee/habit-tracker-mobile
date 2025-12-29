@@ -16,13 +16,19 @@ class FirestoreService {
     collectionName: string
   ): Promise<(Habit & { firestoreId: string })[]> {
     try {
+      console.log(`[FIRESTORE]: Getting all data in ${collectionName}...`);
       const snapshot = await getDocs(collection(db, collectionName));
-      return snapshot.docs.map((doc) => ({
+
+      console.log(`[FIRESTORE]: Data: `);
+      const data = snapshot.docs.map((doc) => ({
         firestoreId: doc.id,
         ...(doc.data() as Habit),
       }));
+      console.log(data);
+
+      return data;
     } catch (error) {
-      console.error("Error getting data from firestore", error);
+      console.error("[FIRESTORE]: Error getting data: ", error);
       throw error;
     }
   }
@@ -30,11 +36,9 @@ class FirestoreService {
   // Push data or chagnes to firestore
   async pushDatas(collectionName: string, datas: Habit[]): Promise<void> {
     try {
+      console.log(`[FIRESTORE]: Pushing datas to ${collectionName}...`);
       datas.forEach(async (data) => {
         if (data["firestore_id"]) {
-          console.log(`[FIRESTORE]: updating data...`);
-          console.log(`[FIRESTORE]: data: `);
-          console.log(data);
           
           const docRef = doc(db, collectionName, data.firestore_id);
           await setDoc(
@@ -44,27 +48,23 @@ class FirestoreService {
             },
             { merge: true }
           );
-          console.log(`[FIRESTORE]: updated data...`);
         } else {
-          console.log(`[FIRESTORE]: adding data...`);
-          console.log(`[FIRESTORE]: data: `);
-          console.log(data);
           
           const docRef = await addDoc(collection(db, collectionName), {
             ...data,
           });
-
+          
           const newFirestoreId = docRef.id;
           if (collectionName === "habits") {
             HabitStorageService.updateHabit(data.id, {
               firestore_id: newFirestoreId,
             });
           }
-          console.log(`[FIRESTORE]: added data`);
         }
       });
+      console.log(`[FIRESTORE]: Pushing datas to ${collectionName} done`);
     } catch (error) {
-      console.error("Error pushing data in firestore: ", error);
+      console.error("[FIRESTORE]: Error pushing data: ", error);
       throw error;
     }
   }
@@ -75,18 +75,24 @@ class FirestoreService {
     lastSyncTime: Date
   ): Promise<(Habit & { firestoreId: string })[]> {
     try {
+      console.log(
+        `[FIRESTORE]: Getting all unsync data in ${collectionName}...`
+      );
       const q = query(
         collection(db, collectionName),
         where("updatedAt", ">", lastSyncTime)
       );
       const snapshot = await getDocs(q);
-
-      return snapshot.docs.map((doc) => ({
+      const data = snapshot.docs.map((doc) => ({
         firestoreId: doc.id,
         ...(doc.data() as Habit),
       }));
+      console.log(`[FIRESTORE]: All unsync data in ${collectionName}: `);
+      console.log(data);
+
+      return data;
     } catch (error) {
-      console.error("Error getting unsync data in firestore: ", error);
+      console.error("[FIRESTORE]: Error getting unsync data: ", error);
       throw error;
     }
   }

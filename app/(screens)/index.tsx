@@ -22,7 +22,6 @@ export default function Index() {
       }
     };
     syncData();
-    // console.log("hello");
   }, []);
 
   return (

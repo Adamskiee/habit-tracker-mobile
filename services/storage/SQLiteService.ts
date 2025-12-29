@@ -35,31 +35,35 @@ class SQLiteService {
     })[]
   ): Promise<void> {
     try {
+      console.log(`[SQLITE]: Fetching data to ${tableName}...`);
       if (tableName === "habits") {
         datas.forEach((data) => {
           HabitStorageService.createHabit(data);
         });
       }
+      console.log(`[SQLITE]: Fetching data to ${tableName} done`);
     } catch (error) {
-      console.error("Error fetching data to SQLite: ", error);
+      console.error("[SQLITE]: Error fetching data: ", error);
       throw error;
     }
   }
-  // Update records
 
+  // Update records
   async update(
     tableName: string,
     datas: (Habit & { firestoreId: string })[]
   ): Promise<void> {
     try {
+      console.log(`[SQLITE]: Updating data in ${tableName}...`);
       if (tableName === "habits") {
         datas.forEach((data) => {
           // TODO: update the specific records that is changed
           HabitStorageService.updateHabit(data.id, data);
         });
       }
+      console.log(`[SQLITE]: Updating data in ${tableName} done`);
     } catch (error) {
-      console.error(error);
+      console.error(`[SQLITE]: Error updating data: ${error}`);
     }
   }
 

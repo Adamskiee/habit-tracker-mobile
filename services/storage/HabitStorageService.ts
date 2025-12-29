@@ -43,11 +43,12 @@ class HabitStorageService {
   async getHabitById(id: number): Promise<Habit | null> {
     try {
       const habit = await this.db.getFirstAsync<Habit>(
-        "SELECT * FROM habits WHERE isDeleted = 0, id = ?",
-        [id]
+        "SELECT * FROM habits WHERE isDeleted = ? AND id = ?",
+        [0, id]
       );
       return habit || null;
     } catch (error) {
+      console.error("[SQLITE]: Error getting habit: ", error);
       throw error;
     }
   }
@@ -68,13 +69,17 @@ class HabitStorageService {
 
   async getAllUnsyncHabits(): Promise<Habit[]> {
     try {
+      console.log(`[SQLITE]: Getting all unsync data in habits...`);
       const habits = await this.db.getAllAsync<Habit>(
         "SELECT * FROM habits WHERE isSync = ?",
         [0]
       );
+      console.log(`[SQLITE]: Unsync data in habits: `);
+      console.log(habits);
 
       return habits as Habit[];
     } catch (error) {
+      console.log(`[SQLITE]: Error getting all unsync data: ${error}`);
       throw error;
     }
   }
@@ -162,6 +167,7 @@ class HabitStorageService {
         message: "Updated successfully",
       };
     } catch (error) {
+      console.log("[SQLITE]: Error updating data: ", error);
       throw error;
     }
   }
@@ -188,18 +194,20 @@ class HabitStorageService {
         message: "Toggle habit successfully",
       };
     } catch (error) {
-      console.error(error);
+      console.error("[SQLITE]: Error toggling habit completion: ", error);
       return { success: false, message: "Toggling habit error" };
     }
   }
 
   async makeHabitsSync(habits: Habit[]): Promise<Habit[]> {
     try {
+      console.log(`[SQLITE]: Making data's isSync field to true...`);
       habits.forEach(
         async (habit) => await this.updateHabit(habit.id, { isSync: 1 })
       );
 
       const syncHabits = habits.map((habit) => ({ ...habit, isSync: 1 }));
+      console.log(`[SQLITE]: Making data's isSync field to true done`);
 
       return syncHabits;
     } catch (error) {
@@ -211,7 +219,10 @@ class HabitStorageService {
   // DELETE
   async deteteHabit(id: number): Promise<void> {
     try {
-      await this.db.runAsync("UPDATE habits SET isDeleted = 1, isSync = 0 WHERE id = ?",[id] );
+      await this.db.runAsync(
+        "UPDATE habits SET isDeleted = 1, isSync = 0 WHERE id = ?",
+        [id]
+      );
     } catch (error) {
       throw error;
     }
