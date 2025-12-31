@@ -31,6 +31,7 @@ const DebugScreen = () => {
   const handleGetDatas = async () => {
     try {
      console.log(await HabitStorageService.getAllHabits());
+     console.log(await HabitStorageService.getDeletedHabits())
     } catch (error) {
      console.error(error) 
     }

@@ -36,6 +36,18 @@ class HabitStorageService {
     }
   }
 
+  async getDeletedHabits(): Promise<Habit[]> {
+    try {
+      const habits = await this.db.getAllAsync<Habit>(
+        "SELECT * FROM habits"
+      );
+
+      return habits as Habit[];
+    } catch (error) {
+      throw error;
+    }
+  }
+
   async getHabitById(id: number): Promise<Habit | null> {
     try {
       const habit = await this.db.getFirstAsync<Habit>(
@@ -215,9 +227,11 @@ class HabitStorageService {
 
   async deleteSyncDeletedHabits(): Promise<void> {
     try {
-     await this.db.runAsync("DELETE FROM habits WHERE isSync = 1 AND isDeleted = 1") 
+      await this.db.runAsync(
+        "DELETE FROM habits WHERE isSync = 1 AND isDeleted = 1"
+      );
     } catch (error) {
-     throw error 
+      throw error;
     }
   }
 
