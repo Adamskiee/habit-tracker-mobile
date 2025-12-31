@@ -1,3 +1,4 @@
+import { HabitStorageService } from "@/services";
 import SQLiteService from "@/services/storage/SQLiteService";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
@@ -27,6 +28,14 @@ const DebugScreen = () => {
     }
   };
 
+  const handleGetDatas = async () => {
+    try {
+     console.log(await HabitStorageService.getAllHabits());
+    } catch (error) {
+     console.error(error) 
+    }
+  }
+
   return (
     <View className="screen-view">
       <View className="flex-1 gap-4">
@@ -38,6 +47,9 @@ const DebugScreen = () => {
         </Pressable>
         <Pressable className="btn" onPress={handleCreateTable}>
           <Text>Create Habits Table</Text>
+        </Pressable>
+        <Pressable className="btn" onPress={handleGetDatas}>
+          <Text>Get all habits</Text>
         </Pressable>
       </View>
     </View>
