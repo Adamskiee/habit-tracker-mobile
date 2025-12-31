@@ -32,7 +32,7 @@ class SyncManager {
             lastSync
           );
           if (changedData.length > 0) {
-            await SQLiteService.update("habit", changedData);
+            SQLiteService.fetchAll("habits", changedData);
             this.setLastSyncTime();
           }
         }
@@ -66,10 +66,10 @@ class SyncManager {
 
   async setLastSyncTime() {
     try {
-      const date = new Date().toISOString();
+      const date = Math.floor(Date.now() / 1000);
       console.log(`[SYNC]: Set last sync time to: ${date}`);
       console.log(date);
-      await AsyncStorage.setItem(this.LAST_SYNC_KEY, date);
+      await AsyncStorage.setItem(this.LAST_SYNC_KEY, date.toString());
     } catch (error) {
       console.error(error);
       throw error;
@@ -82,11 +82,10 @@ class SyncManager {
 
       if (!timestamp) return null;
 
-      const date = new Date(timestamp);
+      const date = parseInt(timestamp);
 
-      console.log(`[SYNC]: Last sync time (stored): ${timestamp}`);
-      console.log(`[SYNC]: Last sync time (Date): ${date.toISOString()}`);
-      
+      console.log(`[SYNC]: Last sync time: ${timestamp}`);
+
       return date;
     } catch (error) {
       console.error(error);

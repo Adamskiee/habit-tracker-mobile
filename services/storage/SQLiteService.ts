@@ -19,7 +19,8 @@ class SQLiteService {
         completed INTEGER CHECK(completed IN (0, 1)) NOT NULL DEFAULT "0", 
         isDeleted INTEGER CHECK(isDeleted IN(0, 1)) NOT NULL DEFAULT "0",
         isSync INTEGER CHECK(isSync IN (0,1)) NOT NULL DEFAULT "0",
-        updatedAt TEXT DEFAULT (datetime('now')))`);
+        updatedAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+        )`);
     } catch (error) {
       console.error(error);
       throw error;
@@ -31,14 +32,18 @@ class SQLiteService {
   async fetchAll(
     tableName: string,
     datas: (Habit & {
-      firestoreId: string;
+      firestore_id: string;
     })[]
   ): Promise<void> {
     try {
       console.log(`[SQLITE]: Fetching data to ${tableName}...`);
       if (tableName === "habits") {
-        datas.forEach((data) => {
-          HabitStorageService.createHabit(data);
+        datas.forEach(async (data) => {
+          if (await HabitStorageService.getHabitById(data.id)) {
+            await HabitStorageService.updateHabit(data.id, data);
+          } else {
+            await HabitStorageService.createHabit(data);
+          }
         });
       }
       console.log(`[SQLITE]: Fetching data to ${tableName} done`);
@@ -122,7 +127,6 @@ class SQLiteService {
       console.error(error);
     }
   }
-
 }
 
 export default new SQLiteService();

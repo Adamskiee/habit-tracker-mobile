@@ -15,14 +15,14 @@ class FirestoreService {
   // Get all data in the firestore
   async getAll(
     collectionName: string
-  ): Promise<(Habit & { firestoreId: string })[]> {
+  ): Promise<(Habit & { firestore_id: string })[]> {
     try {
       console.log(`[FIRESTORE]: Getting all data in ${collectionName}...`);
       const snapshot = await getDocs(collection(db, collectionName));
 
       console.log(`[FIRESTORE]: Data: `);
       const data = snapshot.docs.map((doc) => ({
-        firestoreId: doc.id,
+        firestore_id: doc.id,
         ...(doc.data() as Habit),
       }));
       console.log(data);
@@ -39,20 +39,18 @@ class FirestoreService {
     try {
       console.log(`[FIRESTORE]: Pushing datas to ${collectionName}...`);
       datas.forEach(async (data) => {
-        if (data["firestore_id"]) {
+        if (data.firestore_id) {
           const docRef = doc(db, collectionName, data.firestore_id);
           await setDoc(
             docRef,
             {
               ...data,
-              updatedAt: Timestamp.fromDate(new Date(data.updatedAt)),
             },
             { merge: true }
           );
         } else {
           const docRef = await addDoc(collection(db, collectionName), {
             ...data,
-            updatedAt: Timestamp.fromDate(new Date(data.updatedAt)),
           });
 
           const newFirestoreId = docRef.id;
@@ -73,22 +71,21 @@ class FirestoreService {
   // Get all data in the firestore that is not in the local storage(sqlite)
   async getAllUnsync(
     collectionName: string,
-    lastSyncTime: Date
-  ): Promise<(Habit & { firestoreId: string })[]> {
+    lastSyncTime: number
+  ): Promise<(Habit & { firestore_id: string })[]> {
     try {
       console.log(
         `[FIRESTORE]: Getting all unsync data in ${collectionName}...`
       );
-      console.log(lastSyncTime)
+      console.log(lastSyncTime);
       const q = query(
         collection(db, collectionName),
-        where("updatedAt", "<", Timestamp.fromDate(lastSyncTime))
+        where("updatedAt", ">", lastSyncTime)
       );
       const snapshot = await getDocs(q);
       const data = snapshot.docs.map((doc) => ({
-        firestoreId: doc.id,
         ...(doc.data() as Habit),
-        updatedAt: doc.data().updatedAt.toDate().toISOString(),
+        firestore_id: doc.id,
       }));
       console.log(`[FIRESTORE]: All unsync data in ${collectionName}: `);
       console.log(data);

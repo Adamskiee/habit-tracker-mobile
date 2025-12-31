@@ -8,5 +8,5 @@ CREATE TABLE
         completed INTEGER CHECK (completed IN (0, 1)) NOT NULL DEFAULT "0",
         isDeleted INTEGER CHECK (isSync IN (0, 1)) NOT NULL DEFAULT "0",
         isSync INTEGER CHECK (isSync IN (0, 1)) NOT NULL DEFAULT "0",
-        updatedAt TEXT DEFAULT (datetime ('now', 'utc'))
+        updatedAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
     );

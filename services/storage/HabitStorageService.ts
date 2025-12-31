@@ -18,7 +18,8 @@ class HabitStorageService {
       completed INTEGER CHECK(completed IN (0, 1)) NOT NULL DEFAULT "0", 
       isDeleted INTEGER CHECK(isSync IN(0, 1)) NOT NULL DEFAULT "0",
       isSync INTEGER CHECK(isSync IN (0,1)) NOT NULL DEFAULT "0",
-      updatedAt TEXT DEFAULT (datetime('now')))`
+      updatedAt INTEGER NOT NULL DEFAULT (strftime('%s', 'now'))
+      )`
     );
   }
 
@@ -75,10 +76,13 @@ class HabitStorageService {
     updatedAt?: string;
   }): Promise<{ success: boolean; message: string }> {
     try {
-      await this.db.runAsync(
+      console.log("[SQLITE]: Creating habit...");
+      const result = await this.db.runAsync(
         "INSERT INTO habits(title, description) VALUES (?, ?)",
         [newHabit.title, newHabit.description ?? null]
       );
+      console.log("[SQLITE]: Created habit: ");
+      console.log(await this.getHabitById(result.lastInsertRowId));
       return {
         success: true,
         message: "Created successfully",
@@ -126,7 +130,7 @@ class HabitStorageService {
         values.push(updates.isSync);
       }
 
-      fields.push("updatedAt = (datetime('now', 'utc'))");
+      fields.push("updatedAt = (strftime('%s', 'now'))");
       values.push(id);
 
       if (fields.length === 1) {
