@@ -55,12 +55,14 @@ class FirestoreService {
 
           const newFirestoreId = docRef.id;
           if (collectionName === "habits") {
-            HabitStorageService.updateHabit(data.id, {
+            await HabitStorageService.updateHabit(data.id, {
               firestore_id: newFirestoreId,
             });
           }
         }
       });
+      // For deleted habits
+      await HabitStorageService.deleteSyncDeletedHabits();
       console.log(`[FIRESTORE]: Pushing datas to ${collectionName} done`);
     } catch (error) {
       console.error("[FIRESTORE]: Error pushing data: ", error);
