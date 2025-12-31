@@ -5,24 +5,38 @@ import Fab from "@/components/ui/Fab";
 import ViewHabitModal from "@/components/ViewHabitModal";
 import { useHabits } from "@/hooks/useHabits";
 import SyncManager from "@/services/storage/SyncManager";
+import NetInfo from "@react-native-community/netinfo";
 import { useEffect, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 
 export default function Index() {
   const { habits } = useHabits();
   const [activeModal, setActiveModal] = useState<ModalType>("none");
+  const [isWifiConnected, setIsWifiConnected] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    const unsubscribe = NetInfo.addEventListener((state) => {
+      setIsWifiConnected(state.isConnected);
+      console.log("Connection status: ", state.isConnected);
+    });
+
+    return () => unsubscribe();
+  }, []);
 
   useEffect(() => {
     const syncData = async () => {
       try {
-        await SyncManager.startSync();
-        await SyncManager.pushLocalChanges();
+        if (isWifiConnected === true) {
+          console.log("Wifi connected");
+          await SyncManager.startSync();
+          await SyncManager.pushLocalChanges();
+        }
       } catch (error) {
         console.error("Background sync error: ", error);
       }
     };
     syncData();
-  }, []);
+  }, [isWifiConnected]);
 
   return (
     <View className="screen-view">
