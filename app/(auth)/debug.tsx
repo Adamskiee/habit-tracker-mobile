@@ -1,9 +1,12 @@
+import { useHabits } from "@/hooks/useHabits";
 import { HabitStorageService } from "@/services";
 import SQLiteService from "@/services/storage/SQLiteService";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
 
 const DebugScreen = () => {
+  const { habits } = useHabits();
+
   const handleDeleteDatabase = async () => {
     try {
       await SQLiteService.deleteDatabase();
@@ -30,12 +33,16 @@ const DebugScreen = () => {
 
   const handleGetDatas = async () => {
     try {
-     console.log(await HabitStorageService.getAllHabits());
-     console.log(await HabitStorageService.getDeletedHabits())
+      console.log("ALL SQLite DATAS: ");
+      console.log(
+        JSON.stringify(await HabitStorageService.getDeletedHabits(), null, 2)
+      );
+      console.log("ALL STATE DATAS: ");
+      console.log(JSON.stringify(habits, null, 2));
     } catch (error) {
-     console.error(error) 
+      console.error(error);
     }
-  }
+  };
 
   return (
     <View className="screen-view">
