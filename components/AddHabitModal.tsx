@@ -14,12 +14,12 @@ const AddHabitModal = ({ visible, setActiveModal }: AddHabitModalProps) => {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
 
-  const handleAddHabit = () => {
+  const handleAddHabit = async () => {
     if (!title || !description) {
       return;
     }
 
-    addHabit(title, description);
+    await addHabit(title, description);
     setTitle("");
     setDescription("");
     setActiveModal("none");
