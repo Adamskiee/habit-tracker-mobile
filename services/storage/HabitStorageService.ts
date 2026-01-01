@@ -38,9 +38,7 @@ class HabitStorageService {
 
   async getDeletedHabits(): Promise<Habit[]> {
     try {
-      const habits = await this.db.getAllAsync<Habit>(
-        "SELECT * FROM habits"
-      );
+      const habits = await this.db.getAllAsync<Habit>("SELECT * FROM habits");
 
       return habits as Habit[];
     } catch (error) {
@@ -86,7 +84,7 @@ class HabitStorageService {
     firestoreId?: string;
     completed?: boolean;
     updatedAt?: string;
-  }): Promise<{ success: boolean; message: string }> {
+  }): Promise<{ success: boolean; data?: Habit | null; message?: string }> {
     try {
       console.log("[SQLITE]: Creating habit...");
       const result = await this.db.runAsync(
@@ -94,10 +92,11 @@ class HabitStorageService {
         [newHabit.title, newHabit.description ?? null]
       );
       console.log("[SQLITE]: Created habit: ");
-      console.log(await this.getHabitById(result.lastInsertRowId));
+      const data = await this.getHabitById(result.lastInsertRowId);
+      console.log(data);
       return {
         success: true,
-        message: "Created successfully",
+        data: data,
       };
     } catch (error) {
       console.error(`Error creating habits: ${error}`);
@@ -113,7 +112,7 @@ class HabitStorageService {
   async updateHabit(
     id: number,
     updates: HabitEditProps
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<{ success: boolean; data?: Habit | null; message?: string }> {
     try {
       const fields: string[] = [];
       const values: any[] = [];
@@ -159,9 +158,11 @@ class HabitStorageService {
       );
       console.log("[SQLite]: Updated DB");
 
+      const result = await this.getHabitById(id);
+
       return {
         success: true,
-        message: "Updated successfully",
+        data: result,
       };
     } catch (error) {
       console.log("[SQLITE]: Error updating data: ", error);
@@ -171,7 +172,7 @@ class HabitStorageService {
 
   async toggleHabitCompletion(
     id: number
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<{ success: boolean; data?: Habit | null; message?: string }> {
     try {
       const habit = await this.getHabitById(id);
 
@@ -182,13 +183,13 @@ class HabitStorageService {
         };
       }
 
-      await this.updateHabit(id, {
+      const result = await this.updateHabit(id, {
         completed: !habit.completed,
       });
 
       return {
         success: true,
-        message: "Toggle habit successfully",
+        data: result.data,
       };
     } catch (error) {
       console.error("[SQLITE]: Error toggling habit completion: ", error);
@@ -214,12 +215,15 @@ class HabitStorageService {
   }
 
   // DELETE
-  async deteteHabit(id: number): Promise<void> {
+  async deleteHabit(id: number): Promise<{ data: Habit | null }> {
     try {
       await this.db.runAsync(
         "UPDATE habits SET isDeleted = 1, isSync = 0 WHERE id = ?",
         [id]
       );
+      const res = await this.getHabitById(id);
+
+      return { data: res };
     } catch (error) {
       throw error;
     }
