@@ -34,6 +34,7 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     loadHabits();
+    console.log("mount");
   }, []);
 
   const loadHabits = async () => {
@@ -55,12 +56,13 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
       setLoading(true);
       const res = await HabitStorageService.createHabit({ title, description });
 
-      if (res.success) {
-        await loadHabits();
+      if (res.success && res.data) {
+        setHabits([...habits, res.data]);
       } else {
         throw new Error(res.message);
       }
     } catch (error) {
+      await loadHabits();
       setError(error instanceof Error ? error : new Error("An error occured"));
     }
   };
@@ -68,18 +70,21 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   // DELETE
   const deleteHabit = async (id: number) => {
     try {
-      await HabitStorageService.deteteHabit(id);
-      await loadHabits();
+      await HabitStorageService.deleteHabit(id);
+      setHabits(habits.filter((habit) => habit.id !== id));
     } catch (error) {
       setError(error instanceof Error ? error : new Error("An error occured"));
+      await loadHabits();
     }
   };
 
   const deleteAllHabits = async () => {
     try {
       await HabitStorageService.deleteAllhabit();
+      setHabits([]);
     } catch (error) {
       console.error(error);
+      await loadHabits();
     }
   };
 
@@ -96,19 +101,31 @@ export const HabitsProvider = ({ children }: { children: ReactNode }) => {
   // UPDATE
   const toggleHabit = async (id: number) => {
     try {
-      await HabitStorageService.toggleHabitCompletion(id);
-      await loadHabits();
+      const res = await HabitStorageService.toggleHabitCompletion(id);
+
+      if (res.success && res.data) {
+        setHabits(habits.map((habit) => (habit.id === id ? res.data! : habit)));
+      } else {
+        throw Error(res.message);
+      }
     } catch (error) {
       console.error(error);
+      await loadHabits();
     }
   };
 
-  const updateHabit = async (id: number, habit: HabitEditProps) => {
+  const updateHabit = async (id: number, updates: HabitEditProps) => {
     try {
-      await HabitStorageService.updateHabit(id, habit);
-      await loadHabits();
+      const res = await HabitStorageService.updateHabit(id, updates);
+
+      if (res.success && res.data) {
+        setHabits(habits.map((habit) => (habit.id === id ? res.data! : habit)));
+      } else {
+        throw new Error(res.message);
+      }
     } catch (error) {
       console.error("Error updating habits: ", error);
+      await loadHabits();
     }
   };
 
