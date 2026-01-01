@@ -1,4 +1,4 @@
-import { db } from "@/config/firebase";
+import { db, auth } from "@/config/firebase";
 import {
   addDoc,
   collection,
@@ -6,19 +6,45 @@ import {
   getDocs,
   query,
   setDoc,
-  Timestamp,
   where,
 } from "firebase/firestore";
 import HabitStorageService from "./HabitStorageService";
+import { onAuthStateChanged } from "@firebase/auth";
 
 class FirestoreService {
+  private userUid: string | null = null;
+  private authReady: Promise<void>;
+  constructor() {
+    this.authReady = new Promise((res) => {
+      const unsubscribe = onAuthStateChanged(auth, (user) => {
+        this.userUid = user?.uid || null;
+        unsubscribe();
+        res();
+      });
+    });
+  }
+
+  private async ensureAuth() {
+    await this.authReady;
+    if (!this.userUid) {
+      throw new Error("User must be authenticated");
+    }
+  }
+
+  private async getUserCollection(collectionName: string) {
+    await this.ensureAuth();
+    return collection(db, "users", this.userUid!, collectionName);
+  }
+
   // Get all data in the firestore
   async getAll(
     collectionName: string
   ): Promise<(Habit & { firestore_id: string })[]> {
     try {
       console.log(`[FIRESTORE]: Getting all data in ${collectionName}...`);
-      const snapshot = await getDocs(collection(db, collectionName));
+      const snapshot = await getDocs(
+        await this.getUserCollection(collectionName)
+      );
 
       console.log(`[FIRESTORE]: Data: `);
       const data = snapshot.docs.map((doc) => ({
@@ -40,7 +66,10 @@ class FirestoreService {
       console.log(`[FIRESTORE]: Pushing datas to ${collectionName}...`);
       datas.forEach(async (data) => {
         if (data.firestore_id) {
-          const docRef = doc(db, collectionName, data.firestore_id);
+          const docRef = doc(
+            await this.getUserCollection(collectionName),
+            data.firestore_id
+          );
           await setDoc(
             docRef,
             {
@@ -49,9 +78,12 @@ class FirestoreService {
             { merge: true }
           );
         } else {
-          const docRef = await addDoc(collection(db, collectionName), {
-            ...data,
-          });
+          const docRef = await addDoc(
+            await this.getUserCollection(collectionName),
+            {
+              ...data,
+            }
+          );
 
           const newFirestoreId = docRef.id;
           if (collectionName === "habits") {
@@ -84,7 +116,7 @@ class FirestoreService {
       );
       console.log(lastSyncTime);
       const q = query(
-        collection(db, collectionName),
+        await this.getUserCollection(collectionName),
         where("updatedAt", ">", lastSyncTime)
       );
       const snapshot = await getDocs(q);
