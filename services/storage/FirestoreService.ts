@@ -61,6 +61,9 @@ class FirestoreService {
           }
         }
       });
+
+      await HabitStorageService.makeHabitsSync(datas);
+
       // For deleted habits
       await HabitStorageService.deleteSyncDeletedHabits();
       console.log(`[FIRESTORE]: Pushing datas to ${collectionName} done`);
